@@ -13,8 +13,7 @@ import {makeStyles} from '@material-ui/core/styles'
 
 const useStyles = makeStyles(theme => ({
     cardsContainer: {
-        padding: "10px",
-        flex: "1 1 0"
+        padding: "10px"
     }
 }))
 
@@ -46,10 +45,16 @@ const Recipes = ({
             <FullLoading
                 isLoading={isLoadingRecipes}
             />
-            <FullErrorAlert
-                isThereError={isEmpty(loadRecipesError) ? false : true}
-                errorType={FETCH_RECIPES_FAIL}
-            />
+            {
+                isEmpty(loadRecipesError)
+                ?
+                null
+                :
+                <FullErrorAlert
+                    errorType={FETCH_RECIPES_FAIL}
+                    errorMessage={isEmpty(loadRecipesError) ? null : `${loadRecipesError.message}`}
+                />
+            }
         </>
     )
 }

@@ -10,9 +10,9 @@ import {FETCH_RECIPES_FAIL} from "../redux/actions/recipesActionTypes"
 import {clearFetchRecipesError} from "../redux/actions/recipesActions"
 
 const FullErrorAlert = ({
-    isThereError,
     errorType,
-    clearFetchRecipesError
+    clearFetchRecipesError,
+    errorMessage
 }) => {
     const handleClose = useCallback(() => {
         switch (errorType) {
@@ -26,7 +26,7 @@ const FullErrorAlert = ({
 
     return (
         <Dialog
-            open={isThereError}
+            open={true}
             onClose={handleClose}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
@@ -34,7 +34,7 @@ const FullErrorAlert = ({
             <DialogTitle id="alert-dialog-title">{"Error Alert"}</DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-description">
-                    Something went wrong. Please try again later. Sorry for any inconvenience caused.
+                    {errorMessage + ". Please try again later. Sorry for any inconvenience caused."}
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
