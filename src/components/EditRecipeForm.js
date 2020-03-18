@@ -3,8 +3,9 @@ import TextField from "@material-ui/core/TextField"
 import Button from "@material-ui/core/Button"
 import {withFormik} from "formik"
 import * as Yup from "yup"
+import ImageUploader from "../helperComponents/ImageUploader"
 
-const EditRecipeForm = ({recipe, open, handleClose}) => {
+const EditRecipeForm = ({recipe}) => {
     const InnerForm = props => {
         const {
             values,
@@ -18,8 +19,17 @@ const EditRecipeForm = ({recipe, open, handleClose}) => {
             handleReset
         } = props
 
+        const selectImage = image => values.selectedImage = image
+
+        const unselectImage = () => values.selectedImage = null
+
         return (
             <form onSubmit={handleSubmit}>
+                <ImageUploader
+                    image={values.selectedImage}
+                    selectImage={selectImage}
+                    unselectImage={unselectImage}
+                />
                 <TextField
                     autoComplete="off"
                     name="title"
@@ -32,7 +42,7 @@ const EditRecipeForm = ({recipe, open, handleClose}) => {
                     onBlur={handleBlur}
                     error={!errors.title ? false : true}
                     helperText={errors.title ? errors.title : undefined}
-                    style={{marginBottom: "15px"}}
+                    style={{margin: "15px 0 15px 0"}}
                 />
                 <TextField
                     autoComplete="off"
@@ -90,7 +100,8 @@ const EditRecipeForm = ({recipe, open, handleClose}) => {
         mapPropsToValues: () => ({
             title: recipe.title,
             description: recipe.description,
-            instruction: recipe.instruction
+            instruction: recipe.instruction,
+            selectedImage: null
         }),
         validationSchema: Yup.object().shape({
             title: Yup.string()
