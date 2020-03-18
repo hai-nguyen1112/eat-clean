@@ -1,38 +1,25 @@
-import React, {useCallback, useState} from 'react'
-import DialogTitle from "@material-ui/core/DialogTitle"
-import DialogContent from "@material-ui/core/DialogContent"
+import React from 'react'
 import TextField from "@material-ui/core/TextField"
-import DialogActions from "@material-ui/core/DialogActions"
 import Button from "@material-ui/core/Button"
-import Dialog from "@material-ui/core/Dialog"
+import {withFormik} from "formik"
+import * as Yup from "yup"
 
 const EditRecipeForm = ({recipe, open, handleClose}) => {
-    const [title, setTitle] = useState(recipe.title)
-    const [description, setDescription] = useState(recipe.description)
-    const [instruction, setInstruction] = useState(recipe.instruction)
+    const InnerForm = props => {
+        const {
+            values,
+            errors,
+            dirty,
+            isValid,
+            isSubmitting,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            handleReset
+        } = props
 
-    const resetForm = useCallback(() => {
-        setTitle(recipe.title)
-        setDescription(recipe.description)
-        setInstruction(recipe.instruction)
-    }, [recipe.title, recipe.description, recipe.instruction])
-
-    const handleSubmit = useCallback(e => {
-        e.preventDefault()
-        console.log("I am here")
-    }, [])
-
-    return (
-        <Dialog
-            open={open}
-            onClose={handleClose}
-            disableBackdropClick={true}
-            disableEscapeKeyDown={true}
-            fullWidth={true}
-            scroll="paper"
-        >
-            <DialogTitle>Edit Recipe</DialogTitle>
-            <DialogContent dividers={true}>
+        return (
+            <form onSubmit={handleSubmit}>
                 <TextField
                     autoComplete="off"
                     name="title"
@@ -40,8 +27,11 @@ const EditRecipeForm = ({recipe, open, handleClose}) => {
                     fullWidth={true}
                     label="Title"
                     variant="outlined"
-                    value={title}
-                    onChange={useCallback(e => setTitle(e.target.value),[])}
+                    value={values.title}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={!errors.title ? false : true}
+                    helperText={errors.title ? errors.title : undefined}
                     style={{marginBottom: "15px"}}
                 />
                 <TextField
@@ -50,12 +40,15 @@ const EditRecipeForm = ({recipe, open, handleClose}) => {
                     required
                     fullWidth={true}
                     label="Description"
+                    variant="outlined"
+                    value={values.description}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={!errors.description ? false : true}
+                    helperText={errors.description ? errors.description : undefined}
+                    style={{marginBottom: "15px"}}
                     multiline
                     rows="4"
-                    variant="outlined"
-                    value={description}
-                    onChange={useCallback(e => setDescription(e.target.value), [])}
-                    style={{marginBottom: "15px"}}
                 />
                 <TextField
                     autoComplete="off"
@@ -63,27 +56,63 @@ const EditRecipeForm = ({recipe, open, handleClose}) => {
                     required
                     fullWidth={true}
                     label="Instruction"
+                    variant="outlined"
+                    value={values.instruction}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={!errors.instruction ? false : true}
+                    helperText={errors.instruction ? errors.instruction : undefined}
+                    style={{marginBottom: "15px"}}
                     multiline
                     rows="4"
-                    variant="outlined"
-                    value={instruction}
-                    onChange={useCallback(e => setInstruction(e.target.value), [])}
                 />
-            </DialogContent>
-            <DialogActions>
                 <Button
-                    onClick={() => {
-                        handleClose()
-                        setTimeout(resetForm, 1000)
-                    }}
-                    color="primary"
+                    variant="contained"
+                    onClick={handleReset}
+                    disabled={!dirty || isSubmitting}
                 >
-                    Cancel
+                    Reset
                 </Button>
-                <Button onClick={handleSubmit} color="primary">Submit</Button>
-            </DialogActions>
-        </Dialog>
-    )
+                &nbsp;&nbsp;
+                <Button
+                    color="primary"
+                    variant="contained"
+                    type="submit"
+                    disabled={isSubmitting || !isValid || !dirty}
+                >
+                    Submit
+                </Button>
+            </form>
+        )
+    }
+
+    const EnhancedForm = withFormik({
+        mapPropsToValues: () => ({
+            title: recipe.title,
+            description: recipe.description,
+            instruction: recipe.instruction
+        }),
+        validationSchema: Yup.object().shape({
+            title: Yup.string()
+                .required("Title is required!")
+                .max(100, "Too long!"),
+            description: Yup.string()
+                .required("Description is required!")
+                .max(500, "Too long!"),
+            instruction: Yup.string()
+                .required("Instruction is required!")
+                .max(1000, "Too long!")
+        }),
+        handleSubmit: (values, { setSubmitting }) => {
+            setTimeout(() => {
+                alert(JSON.stringify(values, null, 2));
+                setSubmitting(false);
+            }, 1000);
+        },
+        displayName: "BasicForm" // helps with React DevTools
+    })(InnerForm)
+
+    return <EnhancedForm/>
 }
 
 export default EditRecipeForm

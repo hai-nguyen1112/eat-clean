@@ -6,7 +6,7 @@ import CardContent from '@material-ui/core/CardContent'
 import CardActions from '@material-ui/core/CardActions'
 import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
-import EditRecipeDialog from "./EditRecipeDialog"
+import ViewRecipeDialog from "./ViewRecipeDialog"
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -21,6 +21,12 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    cardActions: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center'
     }
 }))
 
@@ -34,7 +40,7 @@ const RecipeCard = ({recipe}) => {
                 <CardMedia
                     className={classes.media}
                     image={imageSrc}
-                    title="Paella dish"
+                    title={recipe.title}
                 />
                 <CardContent>
                     <Typography gutterBottom variant="h5" component="h2">
@@ -46,8 +52,8 @@ const RecipeCard = ({recipe}) => {
                         Last Updated: {recipe.updated_at}
                     </Typography>
                 </CardContent>
-                <CardActions disableSpacing>
-                    <EditRecipeDialog recipe={recipe}/>
+                <CardActions className={classes.cardActions} disableSpacing>
+                    <ViewRecipeDialog recipe={recipe}/>
                 </CardActions>
             </Card>
         </Grid>
