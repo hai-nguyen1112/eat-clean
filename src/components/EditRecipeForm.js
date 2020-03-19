@@ -4,6 +4,8 @@ import Button from "@material-ui/core/Button"
 import {withFormik} from "formik"
 import * as Yup from "yup"
 import ImageUploader from "../helperComponents/ImageUploader"
+import FormControl from "@material-ui/core/FormControl"
+import FormHelperText from "@material-ui/core/FormHelperText"
 
 const EditRecipeForm = ({recipe}) => {
     const InnerForm = props => {
@@ -16,20 +18,27 @@ const EditRecipeForm = ({recipe}) => {
             handleChange,
             handleBlur,
             handleSubmit,
-            handleReset
+            // handleReset,
+            setFieldValue
         } = props
 
-        const selectImage = image => values.selectedImage = image
+        const selectImage = image => setFieldValue('selectedImage', image)
 
-        const unselectImage = () => values.selectedImage = null
+        const unselectImage = () => setFieldValue('selectedImage', null)
 
         return (
             <form onSubmit={handleSubmit}>
-                <ImageUploader
-                    image={values.selectedImage}
-                    selectImage={selectImage}
-                    unselectImage={unselectImage}
-                />
+                <FormControl
+                    fullWidth={true}
+                    error={!errors.selectedImage ? false : true}
+                >
+                    <ImageUploader
+                        image={values.selectedImage}
+                        selectImage={selectImage}
+                        unselectImage={unselectImage}
+                    />
+                    {errors.selectedImage ? <FormHelperText>{errors.selectedImage}</FormHelperText> : undefined}
+                </FormControl>
                 <TextField
                     autoComplete="off"
                     name="title"
@@ -76,13 +85,13 @@ const EditRecipeForm = ({recipe}) => {
                     multiline
                     rows="4"
                 />
-                <Button
-                    variant="contained"
-                    onClick={handleReset}
-                    disabled={!dirty || isSubmitting}
-                >
-                    Reset
-                </Button>
+                {/*<Button*/}
+                {/*    variant="contained"*/}
+                {/*    onClick={handleReset}*/}
+                {/*    disabled={!dirty || isSubmitting}*/}
+                {/*>*/}
+                {/*    Reset*/}
+                {/*</Button>*/}
                 &nbsp;&nbsp;
                 <Button
                     color="primary"
@@ -101,18 +110,25 @@ const EditRecipeForm = ({recipe}) => {
             title: recipe.title,
             description: recipe.description,
             instruction: recipe.instruction,
-            selectedImage: null
+            selectedImage: recipe.image
         }),
         validationSchema: Yup.object().shape({
             title: Yup.string()
                 .required("Title is required!")
-                .max(100, "Too long!"),
+                .max(100, "Text is too long!"),
             description: Yup.string()
                 .required("Description is required!")
-                .max(500, "Too long!"),
+                .max(500, "Text is too long!"),
             instruction: Yup.string()
                 .required("Instruction is required!")
-                .max(1000, "Too long!")
+                .max(1000, "Text is too long!"),
+            selectedImage: Yup.mixed()
+                .required("Image is required!")
+                .test(
+                    "fileSize",
+                    "Max size is 80KB!",
+                    value => value && value.size <= 81920
+                )
         }),
         handleSubmit: (values, { setSubmitting }) => {
             setTimeout(() => {
