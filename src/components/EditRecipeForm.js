@@ -1,16 +1,32 @@
-import React from 'react'
+import React, {useState, useCallback} from 'react'
 import TextField from "@material-ui/core/TextField"
 import Button from "@material-ui/core/Button"
 import {withFormik} from "formik"
 import * as Yup from "yup"
-import ImageUploader from "../helperComponents/ImageUploader"
 import FormControl from "@material-ui/core/FormControl"
 import FormHelperText from "@material-ui/core/FormHelperText"
+import {connect} from 'react-redux'
+import {editRecipe} from "../redux/actions/editRecipeActions"
+import ImageUploadInput from "../helperComponents/ImageUploadInput"
+import CardMedia from '@material-ui/core/CardMedia'
+import {makeStyles} from '@material-ui/core/styles'
 
-const EditRecipeForm = ({recipe}) => {
+const useStyles = makeStyles(theme => ({
+    media: {
+        height: 0,
+        paddingTop: '56.25%', // 16:9
+    }
+}))
+
+const EditRecipeForm = ({recipe, updateRecipe}) => {
+    const [previewImage, setPreviewImage] = useState(!recipe.image ? "https://bulma.io/images/placeholders/1280x960.png" : recipe.image)
+
+    const classes = useStyles()
+
     const InnerForm = props => {
         const {
             values,
+            // touched,
             errors,
             dirty,
             isValid,
@@ -22,22 +38,32 @@ const EditRecipeForm = ({recipe}) => {
             setFieldValue
         } = props
 
-        const selectImage = image => setFieldValue('selectedImage', image)
+        // const selectImage = image => setFieldValue('image', image)
+        // const unselectImage = () => setFieldValue('selectedImage', null)
 
-        const unselectImage = () => setFieldValue('selectedImage', null)
+        const updatePreviewImage = useCallback(updatedImage => {
+            setPreviewImage(updatedImage)
+            setFieldValue('image', updatedImage)
+        }, [])
+
+        console.log(values.image)
+        console.log(dirty)
 
         return (
             <form onSubmit={handleSubmit}>
                 <FormControl
                     fullWidth={true}
-                    error={!errors.selectedImage ? false : true}
+                    // error={!errors.selectedImage ? false : true}
                 >
-                    <ImageUploader
-                        image={values.selectedImage}
-                        selectImage={selectImage}
-                        unselectImage={unselectImage}
+                    <CardMedia
+                        className={classes.media}
+                        image={previewImage}
+                        title="dish image"
                     />
-                    {errors.selectedImage ? <FormHelperText>{errors.selectedImage}</FormHelperText> : undefined}
+                    <ImageUploadInput
+                        updatePreviewImage={updatePreviewImage}
+                    />
+                    {/*{errors.selectedImage ? <FormHelperText>{errors.selectedImage}</FormHelperText> : undefined}*/}
                 </FormControl>
                 <TextField
                     autoComplete="off"
@@ -50,7 +76,9 @@ const EditRecipeForm = ({recipe}) => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     error={!errors.title ? false : true}
+                    // error={errors.title && touched.title ? true : false}
                     helperText={errors.title ? errors.title : undefined}
+                    // helperText={errors.title && touched.title ? errors.title : undefined}
                     style={{margin: "15px 0 15px 0"}}
                 />
                 <TextField
@@ -110,7 +138,7 @@ const EditRecipeForm = ({recipe}) => {
             title: recipe.title,
             description: recipe.description,
             instruction: recipe.instruction,
-            selectedImage: recipe.image
+            image: recipe.image
         }),
         validationSchema: Yup.object().shape({
             title: Yup.string()
@@ -122,19 +150,21 @@ const EditRecipeForm = ({recipe}) => {
             instruction: Yup.string()
                 .required("Instruction is required!")
                 .max(1000, "Text is too long!"),
-            selectedImage: Yup.mixed()
-                .required("Image is required!")
-                .test(
-                    "fileSize",
-                    "Max size is 80KB!",
-                    value => value && value.size <= 81920
-                )
+            image: Yup.string()
+                .required("Image is required!"),
+            // selectedImage: Yup.mixed()
+            //     .required("Image is required!")
+            //     .test(
+            //         "fileSize",
+            //         "Max size is 80KB!",
+            //         value => value && value.size <= 81920
+            //     )
         }),
         handleSubmit: (values, { setSubmitting }) => {
             setTimeout(() => {
-                alert(JSON.stringify(values, null, 2));
-                setSubmitting(false);
-            }, 1000);
+                alert(JSON.stringify(values, null, 2))
+                setSubmitting(false)
+            }, 1000)
         },
         displayName: "BasicForm" // helps with React DevTools
     })(InnerForm)
@@ -142,4 +172,10 @@ const EditRecipeForm = ({recipe}) => {
     return <EnhancedForm/>
 }
 
-export default EditRecipeForm
+const mapDispatchToProps = dispatch => {
+    return {
+        updateRecipe: (id, dataToEdit) => dispatch(editRecipe(id, dataToEdit))
+    }
+}
+
+export default connect(null, mapDispatchToProps)(EditRecipeForm)
